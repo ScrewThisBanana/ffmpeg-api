@@ -16,12 +16,12 @@
 #
 #####################################################################
 
-FROM node:18.19.0-alpine3.19 as build
+FROM node:lts-alpine@sha256:06d7adf3e0ef61a13f1d28682726366f97a15aa1888c934d3ecec86c33918b53 as build
 
 RUN apk add --no-cache git
 
 # install pkg
-RUN npm install -g pkg
+RUN npm install -g @yao-pkg/pkg
 
 ENV PKG_CACHE_PATH /usr/cache
 
@@ -29,14 +29,13 @@ WORKDIR /usr/src/app
 
 # Bundle app source
 COPY ./src .
-RUN npm install
+RUN npm ci --omit=dev
 
 # Create single binary file
-RUN pkg --targets node12-alpine-x64 /usr/src/app/package.json
+RUN pkg --targets node24-alpine-arm64 /usr/src/app/package.json
 
 
-FROM jrottenberg/ffmpeg:4.4.1-alpine313
-
+FROM jrottenberg/ffmpeg:8-alpine@sha256:3ab1c371ad3e734e7a31a3219e6a75120f1106c776b291db1bfc2d20158cd73e
 # Create user and change workdir
 RUN adduser --disabled-password --home /home/ffmpgapi ffmpgapi
 WORKDIR /home/ffmpgapi
